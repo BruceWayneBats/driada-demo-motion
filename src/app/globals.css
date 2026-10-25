@@ -154,15 +154,42 @@ summary::-webkit-details-marker {
     border-color 300ms,
     background-color 300ms;
 }
-.lift:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 22px 40px -24px rgb(127 85 48 / 0.35);
+@media (hover: hover) {
+  .lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 22px 40px -24px rgb(127 85 48 / 0.35);
+  }
+  .group:hover .zoom > * {
+    transform: scale(1.06);
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -14px rgb(58 44 32 / 0.5);
+  }
+  .arrow:hover svg,
+  .group:hover .arrow svg {
+    transform: translateX(5px);
+  }
+  .navlink:hover {
+    background-size: 100% 1px;
+  }
+}
+/* Телефоны: отклик на касание */
+@media (hover: none) {
+  a.group {
+    transition: transform 400ms var(--ease-out);
+  }
+  .lift:active,
+  a.group:active {
+    transform: scale(0.98);
+    transition-duration: 150ms;
+  }
+  a.group:active .zoom > * {
+    transform: scale(1.03);
+  }
 }
 .zoom > * {
   transition: transform 900ms var(--ease-out);
-}
-.group:hover .zoom > * {
-  transform: scale(1.06);
 }
 .btn {
   transition:
@@ -170,27 +197,16 @@ summary::-webkit-details-marker {
     background-color 250ms,
     box-shadow 300ms var(--ease-out);
 }
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px -14px rgb(58 44 32 / 0.5);
-}
 .btn:active {
   transform: translateY(0) scale(0.98);
 }
 .arrow svg {
   transition: transform 400ms var(--ease-out);
 }
-.arrow:hover svg,
-.group:hover .arrow svg {
-  transform: translateX(5px);
-}
 /* Подчёркивание пунктов меню */
 .navlink {
   background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
   transition: background-size 400ms var(--ease-out), color 250ms;
-}
-.navlink:hover {
-  background-size: 100% 1px;
 }
 
 /* --- Шапка: тень после начала прокрутки --- */
@@ -244,14 +260,32 @@ details[open] > nav {
   transform: scaleX(0);
 }
 
-/* Кто попросил меньше движения — без анимаций */
+/* «Уменьшение движения» в системе: без сдвигов, перелётов и бегущей строки —
+   остаются только мягкие проявления прозрачностью */
+@keyframes fade-only {
+  from { opacity: 0; }
+}
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after,
-  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
-    animation: none !important;
-    transition: none !important;
-  }
-  .motion [data-reveal]:not(.is-in) { opacity: 1; transform: none; }
-  .wood-draw > * { stroke-dashoffset: 0 !important; }
   html { scroll-behavior: auto; }
+  .motion [data-hero] > *,
+  .motion [data-hero-art],
+  .motion .word,
+  ::view-transition-new(.page-in) {
+    animation-name: fade-only;
+  }
+  ::view-transition-old(.page-out) {
+    animation: 200ms ease both page-fade-out;
+  }
+  ::view-transition-group(.morph) {
+    animation-duration: 0s;
+  }
+  .motion [data-reveal]:not(.is-in) { transform: none; }
+  .motion [data-reveal] { transition-property: opacity; }
+  .motion [data-reveal]:not(.is-in) .grow-line { transform: none; }
+  .marquee-track, .wood-grain, .motion .callbar { animation: none; }
+  .lift:hover, .btn:hover, .btn:active, .lift:active, a.group:active { transform: none; }
+  .group:hover .zoom > *, .arrow:hover svg, .group:hover .arrow svg { transform: none; }
+}
+@keyframes page-fade-out {
+  to { opacity: 0; }
 }
