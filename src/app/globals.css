@@ -1,0 +1,257 @@
+@import "tailwindcss";
+
+/* Палитра светлого дерева: берёза, светлый дуб, орех для текста */
+:root {
+  --birch: #fbf8f2;
+  --oak-50: #f5eee2;
+  --oak-100: #ede1cd;
+  --oak-200: #e0cfb3;
+  --oak-400: #c49a6c;
+  --oak-600: #9a6a3c;
+  --oak-700: #7f5530;
+  --walnut: #3a2c20;
+  --walnut-soft: #6e5b48;
+  --sage: #7d8a63;
+}
+
+@theme inline {
+  --color-birch: var(--birch);
+  --color-oak-50: var(--oak-50);
+  --color-oak-100: var(--oak-100);
+  --color-oak-200: var(--oak-200);
+  --color-oak-400: var(--oak-400);
+  --color-oak-600: var(--oak-600);
+  --color-oak-700: var(--oak-700);
+  --color-walnut: var(--walnut);
+  --color-walnut-soft: var(--walnut-soft);
+  --color-sage: var(--sage);
+  --font-sans: var(--font-manrope);
+  --font-serif: var(--font-lora);
+}
+
+html {
+  scroll-behavior: smooth;
+  /* шапка липкая — при переходах не прятать под ней начало страницы */
+  scroll-padding-top: 64px;
+}
+
+body {
+  background: var(--birch);
+  color: var(--walnut);
+}
+
+::selection {
+  background: var(--oak-200);
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* ================= Анимации ================= */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* --- Переходы между страницами (View Transitions) --- */
+::view-transition-old(.page-out) {
+  animation: 220ms var(--ease-in-out) both page-out;
+}
+::view-transition-new(.page-in) {
+  animation: 520ms var(--ease-out) 120ms both page-in;
+}
+@keyframes page-out {
+  to { opacity: 0; transform: translateY(-14px); filter: blur(2px); }
+}
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(22px); filter: blur(3px); }
+}
+/* Картинка товара перелетает из карточки на страницу товара */
+::view-transition-group(.morph) {
+  animation-duration: 560ms;
+  animation-timing-function: var(--ease-out);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: via-blur;
+}
+@keyframes via-blur {
+  35% { filter: blur(2px); }
+}
+
+/* --- Первый экран: элементы выплывают по очереди --- */
+.motion [data-hero] > * {
+  animation: rise 900ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 110ms + 80ms);
+}
+.motion [data-hero-art] {
+  animation: art-in 1200ms var(--ease-out) 250ms both;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(26px); }
+}
+@keyframes art-in {
+  from { opacity: 0; transform: scale(0.94) rotate(-1.5deg); }
+}
+/* Слоган проявляется слово за словом */
+.motion .word {
+  display: inline-block;
+  animation: word 900ms var(--ease-out) both;
+  animation-delay: calc(var(--w, 0) * 90ms + 300ms);
+}
+@keyframes word {
+  from { opacity: 0; transform: translateY(0.45em); filter: blur(4px); }
+}
+
+/* --- Появление при прокрутке --- */
+.motion [data-reveal] {
+  transition:
+    opacity 900ms var(--ease-out),
+    transform 900ms var(--ease-out);
+  transition-delay: var(--d, 0ms);
+}
+.motion [data-reveal]:not(.is-in) {
+  opacity: 0;
+  transform: translateY(32px);
+}
+/* если JS не загрузился — показать всё через 2.5 с */
+.motion:not(.motion-ready) [data-reveal]:not(.is-in) {
+  animation: reveal-fallback 0s 2.5s forwards;
+}
+@keyframes reveal-fallback {
+  to { opacity: 1; transform: none; }
+}
+
+/* --- Иллюстрации: контур «рисуется», текстура дерева медленно дышит --- */
+.wood-draw > * {
+  stroke-dasharray: 900;
+  stroke-dashoffset: 0;
+}
+.motion [data-reveal]:not(.is-in) .wood-draw > * {
+  stroke-dashoffset: 900;
+}
+.motion [data-reveal].is-in .wood-draw > *,
+.motion [data-hero-art] .wood-draw > * {
+  animation: draw 1800ms var(--ease-in-out) both;
+  animation-delay: calc(var(--d, 0ms) + 200ms);
+}
+@keyframes draw {
+  from { stroke-dashoffset: 900; }
+  to { stroke-dashoffset: 0; }
+}
+.wood-grain {
+  animation: grain 14s var(--ease-in-out) infinite alternate;
+}
+@keyframes grain {
+  to { transform: translateX(-18px); }
+}
+
+/* --- Наведение --- */
+.lift {
+  transition:
+    transform 500ms var(--ease-out),
+    box-shadow 500ms var(--ease-out),
+    border-color 300ms,
+    background-color 300ms;
+}
+.lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 40px -24px rgb(127 85 48 / 0.35);
+}
+.zoom > * {
+  transition: transform 900ms var(--ease-out);
+}
+.group:hover .zoom > * {
+  transform: scale(1.06);
+}
+.btn {
+  transition:
+    transform 300ms var(--ease-out),
+    background-color 250ms,
+    box-shadow 300ms var(--ease-out);
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -14px rgb(58 44 32 / 0.5);
+}
+.btn:active {
+  transform: translateY(0) scale(0.98);
+}
+.arrow svg {
+  transition: transform 400ms var(--ease-out);
+}
+.arrow:hover svg,
+.group:hover .arrow svg {
+  transform: translateX(5px);
+}
+/* Подчёркивание пунктов меню */
+.navlink {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size 400ms var(--ease-out), color 250ms;
+}
+.navlink:hover {
+  background-size: 100% 1px;
+}
+
+/* --- Шапка: тень после начала прокрутки --- */
+header {
+  transition: box-shadow 400ms, background-color 400ms;
+}
+html[data-scrolled] header {
+  box-shadow: 0 10px 30px -20px rgb(58 44 32 / 0.35);
+}
+
+/* --- Мобильное меню --- */
+details[open] > nav {
+  animation: menu-in 380ms var(--ease-out) both;
+  transform-origin: top right;
+}
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+}
+
+/* --- Нижняя кнопка звонка на телефоне --- */
+.motion .callbar {
+  animation: callbar 700ms var(--ease-out) 600ms both;
+}
+@keyframes callbar {
+  from { transform: translateY(110%); }
+}
+
+/* --- Бегущая строка --- */
+.marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
+/* --- Линия над преимуществами вырастает --- */
+.motion [data-reveal] .grow-line {
+  transform-origin: left;
+  transition: transform 1100ms var(--ease-out) calc(var(--d, 0ms) + 250ms);
+}
+.motion [data-reveal]:not(.is-in) .grow-line {
+  transform: scaleX(0);
+}
+
+/* Кто попросил меньше движения — без анимаций */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after,
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
+    animation: none !important;
+    transition: none !important;
+  }
+  .motion [data-reveal]:not(.is-in) { opacity: 1; transform: none; }
+  .wood-draw > * { stroke-dashoffset: 0 !important; }
+  html { scroll-behavior: auto; }
+}
