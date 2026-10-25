@@ -30,16 +30,14 @@ export default async function CategoryPage(props: PageProps<"/catalog/[category]
       <Breadcrumbs items={[{ href: "/catalog", label: "Каталог" }, { label: category.name }]} />
       <PageTitle title={category.name} lead={category.description} />
 
-      <div data-reveal className="-mx-4 mb-10 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+      {/* Липкая стеклянная панель категорий: при прокрутке едет под шапкой поверх товаров */}
+      <div data-reveal className="pillbar sticky top-16 z-10 -mx-4 mb-8 flex gap-2 overflow-x-auto px-4 py-3 sm:mx-0 sm:flex-wrap sm:px-3">
         {categories.map((c) => (
           <Link
             key={c.slug}
             href={`/catalog/${c.slug}`}
-            className={`btn shrink-0 rounded-full border px-4 py-2 text-sm ${
-              c.slug === slug
-                ? "border-walnut bg-walnut text-birch"
-                : "border-oak-200 text-walnut-soft hover:border-oak-400"
-            }`}
+            aria-current={c.slug === slug ? "page" : undefined}
+            className="glass-pill shrink-0 rounded-full px-4 py-2 text-sm"
           >
             {c.name}
           </Link>
