@@ -1,0 +1,132 @@
+# Админка сайта (Sveltia CMS). Изменения сохраняются в репозиторий,
+# после чего GitHub Actions пересобирает и публикует сайт (1–2 минуты).
+backend:
+  name: github
+  repo: BruceWayneBats/driada-demo-motion
+  branch: main
+  commit_messages:
+    create: "Добавлено: {{collection}} «{{slug}}»"
+    update: "Изменено: {{collection}} «{{slug}}»"
+    delete: "Удалено: {{collection}} «{{slug}}»"
+    uploadMedia: "Загружен файл {{path}}"
+    deleteMedia: "Удалён файл {{path}}"
+
+site_url: https://brucewaynebats.github.io/driada-demo-motion/
+display_url: https://brucewaynebats.github.io/driada-demo-motion/
+
+# Загруженные фото кладутся в public/uploads и доступны на сайте как /uploads/...
+media_folder: public/uploads
+public_folder: /uploads
+
+collections:
+  - name: products
+    label: Товары
+    label_singular: Товар
+    folder: content/products
+    extension: json
+    format: json
+    create: true
+    delete: true
+    slug: "{{name}}"
+    identifier_field: name
+    summary: "{{name}}"
+    sortable_fields: [name, category]
+    fields:
+      - { name: name, label: Название, widget: string }
+      - name: category
+        label: Категория
+        widget: relation
+        collection: categories
+        value_field: "{{slug}}"
+        search_fields: [name]
+        display_fields: [name]
+      - { name: summary, label: Кратко (под названием в карточке), widget: string, required: false }
+      - { name: description, label: Описание, widget: text, required: false }
+      - name: specs
+        label: Характеристики
+        label_singular: характеристику
+        widget: list
+        required: false
+        summary: "{{name}}: {{value}}"
+        fields:
+          - { name: name, label: Параметр (например «Порода»), widget: string }
+          - { name: value, label: Значение (например «Сосна»), widget: string }
+      - name: images
+        label: Фото (первое — главное). Без фото показывается рисунок-заглушка
+        label_singular: фото
+        widget: list
+        required: false
+        field: { name: image, label: Фото, widget: image }
+
+  - name: categories
+    label: Категории
+    label_singular: Категория
+    folder: content/categories
+    extension: json
+    format: json
+    create: true
+    delete: true
+    slug: "{{name}}"
+    identifier_field: name
+    summary: "{{order}}. {{name}}"
+    sortable_fields: [order, name]
+    fields:
+      - { name: name, label: Название, widget: string }
+      - { name: description, label: Описание, widget: text, required: false }
+      - name: kind
+        label: Рисунок-заглушка (пока у товаров нет фото)
+        widget: select
+        default: furniture
+        options:
+          - { label: Мебель, value: furniture }
+          - { label: Банная мебель, value: bath }
+          - { label: Погонаж, value: moulding }
+          - { label: Пиломатериал, value: lumber }
+          - { label: Щит, value: board }
+          - { label: Панно, value: panel }
+          - { label: Лестница, value: stairs }
+          - { label: Масла, value: finish }
+          - { label: Краски, value: paint }
+      - { name: order, label: Порядок в каталоге (1 — первая), widget: number, value_type: int, default: 99 }
+
+  - name: settings
+    label: Настройки
+    editor: { preview: false }
+    files:
+      - name: promos
+        label: Акции
+        file: content/settings/promos.json
+        fields:
+          - name: promos
+            label: Акции
+            label_singular: акцию
+            widget: list
+            required: false
+            summary: "{{title}}"
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: Текст, widget: text }
+              - { name: until, label: Срок (например «до 31 октября»), widget: string, required: false }
+
+      - name: site
+        label: Контакты и главная
+        file: content/settings/site.json
+        fields:
+          - { name: name, label: Название компании, widget: string }
+          - { name: slogan, label: Слоган на главной, widget: string }
+          - { name: tagline, label: Строка над слоганом, widget: string }
+          - { name: description, label: Описание на главной, widget: text }
+          - { name: mainPhone, label: Единый телефон (в шапке и кнопках «Позвонить»), widget: string }
+          - { name: whatsapp, label: Номер WhatsApp, widget: string }
+          - { name: email, label: Эл. почта, widget: string }
+          - name: branches
+            label: Торговые базы
+            label_singular: базу
+            widget: list
+            summary: "{{city}}"
+            fields:
+              - { name: city, label: Город, widget: string }
+              - { name: address, label: Адрес, widget: string }
+              - { name: hours, label: Часы работы, widget: string }
+              - { name: phone, label: Телефон, widget: string }
+          - { name: legal, label: Реквизиты (внизу сайта), widget: text, required: false }

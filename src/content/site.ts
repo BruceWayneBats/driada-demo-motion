@@ -1,5 +1,7 @@
-// Контакты и общие данные компании (из анкеты клиента).
+// Контакты и общие данные компании: content/settings/site.json (правятся в админке).
 // TODO: единый номер и мессенджеры — клиент пока не прислал; реквизиты юрлица — тоже.
+
+import { readJson, toTel } from "./load";
 
 export type Phone = { label: string; display: string; tel: string };
 export type Branch = {
@@ -10,48 +12,43 @@ export type Branch = {
   mapUrl: string;
 };
 
+type SiteFile = {
+  name: string;
+  slogan: string;
+  tagline: string;
+  description: string;
+  email: string;
+  whatsapp: string;
+  mainPhone: string;
+  branches: { city: string; address: string; hours: string; phone: string }[];
+  legal?: string;
+};
+
+const data = readJson<SiteFile>("settings/site.json");
+
 const map = (q: string) => `https://yandex.ru/maps/?text=${encodeURIComponent(q)}`;
 
-const branches: Branch[] = [
-  {
-    city: "Набережные Челны",
-    address: "Казанский проспект, 234А, стр. 43",
-    hours: "8:00–17:00",
-    phone: { label: "Набережные Челны", display: "+7 (8552) 44-88-00", tel: "+78552448800" },
-    mapUrl: map("Набережные Челны, Казанский проспект, 234А"),
-  },
-  {
-    city: "Нижнекамск",
-    address: "ул. Вокзальная, 5Б",
-    hours: "8:00–17:00",
-    phone: { label: "Нижнекамск", display: "+7 (8555) 84-27-27", tel: "+78555842727" },
-    mapUrl: map("Нижнекамск, ул. Вокзальная, 5Б"),
-  },
-  {
-    city: "Елабуга",
-    address: "Окружное шоссе, 11В",
-    hours: "8:00–17:00",
-    phone: { label: "Елабуга", display: "+7 (8555) 72-66-00", tel: "+78555726600" },
-    mapUrl: map("Елабуга, Окружное шоссе, 11В"),
-  },
-];
+const branches: Branch[] = data.branches.map((b) => ({
+  city: b.city,
+  address: b.address,
+  hours: b.hours,
+  phone: { label: b.city, display: b.phone, tel: toTel(b.phone) },
+  mapUrl: map(`${b.city}, ${b.address}`),
+}));
 
 export const site = {
-  name: "Дриада",
-  slogan: "Дерево для жизни",
-  tagline: "Деревообрабатывающее предприятие с 2004 года",
-  description:
-    "Изделия из лиственницы, липы, сосны и ели: мебель, банная мебель, погонаж, обрезной материал, мебельные щиты, панно и лестничные элементы.",
+  name: data.name,
+  slogan: data.slogan,
+  tagline: data.tagline,
+  description: data.description,
   url: process.env.SITE_URL || "https://driada-demo.vercel.app",
-  email: "driada2004@rambler.ru",
-  // ДЕМО: единый номер для WhatsApp / Telegram / MAX — заглушка
-  whatsapp: "79000000000",
-  // ДЕМО: единый номер с переадресацией по городам ещё не создан — пока главный номер Челнов
-  mainPhone: { label: "Единый номер", display: "+7 (8552) 44-88-00", tel: "+78552448800" } satisfies Phone,
+  email: data.email,
+  // Номер для WhatsApp — только цифры
+  whatsapp: toTel(data.whatsapp).slice(1),
+  mainPhone: { label: "Единый номер", display: data.mainPhone, tel: toTel(data.mainPhone) } satisfies Phone,
   phones: branches.map((b) => b.phone),
   branches,
-  // ДЕМО: реквизиты юрлица — запросить у клиента
-  legal: "",
+  legal: data.legal ?? "",
 };
 
 export const mainPhone = site.mainPhone;
